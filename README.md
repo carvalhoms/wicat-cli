@@ -1,6 +1,6 @@
 # Wicat CLI
 
-CLI tools for Wicat development.
+CLI tools for Wicat development and Docker management.
 
 ## Installation
 
@@ -35,74 +35,158 @@ wicat uuids
 # Gerar UUIDs (quantidade específica)
 wicat uuids -c 10
 
-# Sistema de navegação Go
-wicat go add              # Adicionar nova stack
-wicat go list             # Listar stacks
-wicat go wicat-web        # Mostrar como navegar
-wicat go wicat-web -e     # Mostrar como navegar e executar
+# Sistema Docker - Comandos agrupados por tipo
+wicat docker                    # Seletor interativo
+wicat docker add                # Adicionar novo comando
+wicat docker list               # Listar comandos
+wicat docker edit <comando>     # Editar comando
+wicat docker remove <comando>   # Remover comando
 ```
 
-### Navegação Automática (Recomendado)
+## Sistema Docker
 
-Para navegação real do terminal, adicione esta função ao seu `~/.zshrc` ou `~/.bashrc`:
+### Tipos de Comando
+
+Os comandos Docker são organizados por categoria:
+
+- 🟢 **UP** - Iniciar serviços
+- 🔄 **RESET** - Reiniciar serviços
+- 🟡 **STOP** - Parar serviços
+- 🔴 **REMOVE** - Remover serviços (pede confirmação)
+
+### Sistema de Atalhos
+
+Comandos podem ter atalhos opcionais para execução direta:
 
 ```bash
-# Copie o conteúdo de install/shell-function.sh
-source <(cat install/shell-function.sh)
+# Criar comando com atalho
+wicat d add
+🔗 Atalho (opcional - ex: rw, start, stop): wr
 
-# Ou adicione manualmente:
-function wgo() {
-  if [ -z "$1" ]; then
-    wicat go
-    return
-  fi
-  
-  local path_result
-  path_result=$(wicat go "$1" --get-path 2>/dev/null)
-  
-  if [ $? -eq 0 ] && [ -n "$path_result" ]; then
-    echo "🚀 Navegando para: $path_result"
-    cd "$path_result"
-    
-    if [ "$2" = "-e" ]; then
-      local exec_result
-      exec_result=$(wicat go "$1" --get-exec 2>/dev/null)
-      if [ -n "$exec_result" ]; then
-        echo "⚡ Executando: $exec_result"
-        eval "$exec_result"
-      fi
-    fi
-  else
-    wicat go "$1" "$2"
-  fi
-}
+# Usar atalho direto (muito mais rápido!)
+wicat d wr              # Executa comando diretamente
+
+# Continuar usando seletor
+wicat d                 # Menu interativo
 ```
 
-**Uso da função:**
+### Comandos Pré-configurados
+
+Baseados nos scripts do `wicat-dev-compose/package.json`:
+
+#### UP (Iniciar):
 ```bash
-wgo wicat-web       # Navega para o projeto
-wgo wicat-web -e    # Navega e executa comando
+yarn wicat:dev           # Iniciar Wicat completo
+yarn wicat-staff:dev     # Iniciar Wicat Staff
+```
+
+#### RESET (Reiniciar):
+```bash
+yarn wicat:reset         # Restart todos containers Wicat
+yarn wicat-core:reset    # Restart apenas wicat-core
+yarn wicat-web:reset     # Restart apenas wicat-web
+yarn wicat-nginx:reset   # Restart apenas nginx
+```
+
+#### STOP (Parar):
+```bash
+yarn wicat:stop          # Parar Wicat
+yarn wicat-staff:stop    # Parar Wicat Staff
+```
+
+#### REMOVE (Remover):
+```bash
+yarn wicat:remove        # Remove containers, imagens, volumes
+yarn wicat-staff:remove  # Remove Staff completo
+```
+
+**Exemplo com atalhos:**
+```bash
+wicat d wu              # UP: Iniciar Wicat (atalho para wicat:dev)
+wicat d wr              # RESET: Restart wicat-web (atalho para wicat-web:reset)
+```
+
+### Fluxo de Desenvolvimento
+
+```bash
+# 1. Subir ambiente
+wicat d wu                    # Atalho rápido (ou wicat d → selecionar UP)
+
+# 2. Instalar pacote na IDE (localmente)
+cd wicat-dev-source/wicat-web
+yarn add express
+
+# 3. Restart container para carregar novo pacote
+wicat d wr                    # Atalho rápido (ou wicat d → selecionar wicat-web-reset)
+
+# 4. Continuar desenvolvimento
+```
+
+### Confirmação de Segurança
+
+Comandos do tipo **REMOVE** exigem confirmação:
+```bash
+🔥 Digite "remove" para confirmar a execução:
 ```
 
 ## Development
 
 ```bash
 # Executar em modo desenvolvimento
-yarn dev uuids
+yarn dev
 
 # Build do projeto
 yarn build
 
 # Executar versão compilada
-yarn start uuids
+yarn start
 ```
 
 ## Estrutura do Projeto
 
 ```
 wicat-cli/
-├── src/           # Código TypeScript
-├── dist/          # Código compilado
-├── package.json   # Configurações do projeto
-└── README.md      # Documentação
+├── src/
+│   ├── commands/
+│   │   ├── docker.ts      # Comando Docker principal
+│   │   └── uuids.ts       # Gerador de UUIDs
+│   ├── utils/
+│   │   └── dockerConfig.ts # Configuração Docker
+│   └── index.ts           # Entry point
+├── dist/                  # Código compilado
+├── package.json          # Configurações do projeto
+└── README.md             # Documentação
+```
+
+## Configuração
+
+Comandos Docker são salvos em: `~/.wicat-cli/docker-commands.json`
+
+Exemplo de configuração:
+```json
+[
+  {
+    "name": "wicat-fullstack",
+    "type": "UP",
+    "command": "yarn --cwd /path/to/wicat-dev-compose wicat:dev",
+    "shortcut": "wu"
+  },
+  {
+    "name": "wicat-web-reset",
+    "type": "RESET",
+    "command": "yarn --cwd /path/to/wicat-dev-compose wicat-web:reset",
+    "shortcut": "wr"
+  }
+]
+```
+
+### Aliases Disponíveis
+
+```bash
+wicat d         # Alias para wicat docker
+wicat u         # Alias para wicat uuids
+
+# Atalhos personalizados (exemplos configurados)
+wicat d wu      # Iniciar Wicat completo
+wicat d wr      # Restart wicat-web
 ```

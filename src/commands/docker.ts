@@ -188,13 +188,26 @@ export async function addDockerCommand(): Promise<void> {
           }
           return true;
         }
+      },
+      {
+        type: 'input',
+        name: 'shortcut',
+        message: '🔗 Atalho (opcional - ex: rw, start, stop):',
+        initial: '',
+        validate: (value: string) => {
+          if (value.trim() && value.includes(' ')) {
+            return 'Atalho não pode conter espaços';
+          }
+          return true;
+        }
       }
-    ]) as { name: string; type: DockerCommandType; command: string };
+    ]) as { name: string; type: DockerCommandType; command: string; shortcut: string };
 
     const command: DockerCommand = {
       name: answers.name,
       type: answers.type,
-      command: answers.command.trim()
+      command: answers.command.trim(),
+      shortcut: answers.shortcut.trim() || undefined
     };
 
     saveDockerCommand(command);
@@ -204,6 +217,9 @@ export async function addDockerCommand(): Promise<void> {
     console.log(chalk.blue(`📝 Nome: ${command.name}`));
     console.log(chalk.blue(`🏷️  Tipo: ${command.type}`));
     console.log(chalk.blue(`⚡ Comando: ${command.command}`));
+    if (command.shortcut) {
+      console.log(chalk.blue(`🔗 Atalho: wicat d ${command.shortcut}`));
+    }
 
   } catch (error) {
     console.log('');
@@ -305,8 +321,20 @@ export async function editDockerCommand(commandName: string): Promise<void> {
           }
           return true;
         }
+      },
+      {
+        type: 'input',
+        name: 'shortcut',
+        message: '🔗 Atalho (opcional - ex: rw, start, stop):',
+        initial: existingCommand.shortcut || '',
+        validate: (value: string) => {
+          if (value.trim() && value.includes(' ')) {
+            return 'Atalho não pode conter espaços';
+          }
+          return true;
+        }
       }
-    ]) as { name: string; type: DockerCommandType; command: string };
+    ]) as { name: string; type: DockerCommandType; command: string; shortcut: string };
 
     // Se o nome mudou, remove o comando antigo
     if (answers.name !== existingCommand.name) {
@@ -316,7 +344,8 @@ export async function editDockerCommand(commandName: string): Promise<void> {
     const command: DockerCommand = {
       name: answers.name,
       type: answers.type,
-      command: answers.command.trim()
+      command: answers.command.trim(),
+      shortcut: answers.shortcut.trim() || undefined
     };
 
     saveDockerCommand(command);
@@ -326,6 +355,9 @@ export async function editDockerCommand(commandName: string): Promise<void> {
     console.log(chalk.blue(`📝 Nome: ${command.name}`));
     console.log(chalk.blue(`🏷️  Tipo: ${command.type}`));
     console.log(chalk.blue(`⚡ Comando: ${command.command}`));
+    if (command.shortcut) {
+      console.log(chalk.blue(`🔗 Atalho: wicat d ${command.shortcut}`));
+    }
 
   } catch (error) {
     console.log('');

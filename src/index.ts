@@ -2,18 +2,19 @@
 
 import { Command } from 'commander';
 import { generateUuids } from './commands/uuids.js';
-import { executeGo, addGoStack, listGoStacks, editGoStack } from './commands/go.js';
 import { executeDockerInteractive, addDockerCommand, listDockerCommands, editDockerCommand, removeDockerCommand } from './commands/docker.js';
+import { loadDockerCommands, getDockerCommand } from './utils/dockerConfig.js';
 
 const program = new Command();
 
 program
   .name('wicat')
-  .description('Wicat CLI - Ferramentas para desenvolvimento')
+  .description('Wicat CLI - Ferramentas para desenvolvimento e gerenciamento Docker')
   .version('1.0.0');
 
 program
   .command('uuids')
+  .alias('u')
   .description('Gera UUIDs v4 (interativo ou por parâmetro)')
   .option('-c, --count <number>', 'quantidade de UUIDs para gerar')
   .option('--no-copy', 'não copiar para área de transferência')
@@ -21,51 +22,11 @@ program
     await generateUuids(options);
   });
 
-// Comando go com subcomandos
-const goCommand = program
-  .command('go')
-  .description('Sistema de navegação rápida para projetos');
-
-goCommand
-  .command('add')
-  .description('Adicionar nova stack de navegação')
-  .action(async () => {
-    await addGoStack();
-  });
-
-goCommand
-  .command('list')
-  .description('Listar todas as stacks disponíveis')
-  .action(async () => {
-    await listGoStacks();
-  });
-
-goCommand
-  .command('edit <stack>')
-  .description('Editar uma stack existente')
-  .action(async (stack) => {
-    await editGoStack(stack);
-  });
-
-// Comando go principal (executar stack)
-goCommand
-  .argument('[stack]', 'nome da stack para navegar')
-  .option('-e, --exec', 'executar comando após navegar')
-  .option('--get-path', 'retorna apenas o caminho (uso interno)')
-  .option('--get-exec', 'retorna apenas o comando exec (uso interno)')
-  .action(async (stack, options) => {
-    // Se não tem stack, mostra help
-    if (!stack) {
-      goCommand.help();
-      return;
-    }
-    await executeGo(stack, options.exec, options.getPath, options.getExec);
-  });
-
 // Comando docker com subcomandos
 const dockerCommand = program
   .command('docker')
-  .description('Seletor interativo de comandos Docker agrupados por tipo');
+  .alias('d')
+  .description('Gerenciamento Docker - Comandos organizados por tipo (UP/RESET/STOP/REMOVE)');
 
 dockerCommand
   .command('add')
@@ -100,5 +61,86 @@ dockerCommand
   .action(async () => {
     await executeDockerInteractive();
   });
+
+// Registrar atalhos dinâmicos
+function registerShortcuts() {
+  const commands = loadDockerCommands();
+
+  commands.forEach(cmd => {
+    if (cmd.shortcut) {
+      dockerCommand
+        .command(cmd.shortcut)
+        .description(`Atalho para ${cmd.name} (${cmd.type})`)
+        .action(async () => {
+          // Executa o comando diretamente
+          const { spawn } = await import('child_process');
+          const chalk = await import('chalk');
+
+          console.log(chalk.default.cyan('🐳 Wicat Docker - Atalho Rápido'));
+          console.log(chalk.default.blue(`📝 Comando: ${cmd.name}`));
+          console.log(chalk.default.blue(`🏷️  Tipo: ${cmd.type}`));
+          console.log(chalk.default.blue(`⚡ Executando: ${cmd.command}`));
+          console.log('');
+
+          // Se for comando REMOVE, pedir confirmação
+          if (cmd.type === 'REMOVE') {
+            const enquirer = await import('enquirer');
+            const { prompt } = enquirer.default;
+
+            console.log(chalk.default.yellow('⚠️  ATENÇÃO: Este comando irá remover containers, imagens e volumes!'));
+            console.log('');
+
+            try {
+              const confirmation = await prompt({
+                type: 'input',
+                name: 'confirmText',
+                message: `${chalk.default.red('🔥 Digite "remove" para confirmar a execução:')}`,
+                validate: (value: string) => {
+                  if (value !== 'remove') {
+                    return 'Digite exatamente "remove" para confirmar';
+                  }
+                  return true;
+                }
+              }) as { confirmText: string };
+
+              if (confirmation.confirmText !== 'remove') {
+                console.log('');
+                console.log(chalk.default.yellow('⚠️  Operação cancelada'));
+                return;
+              }
+            } catch (error) {
+              console.log('');
+              console.log(chalk.default.yellow('⚠️  Operação cancelada'));
+              return;
+            }
+
+            console.log('');
+          }
+
+          console.log(chalk.default.green('🏃‍♂️ Executando comando...'));
+
+          const child = spawn(cmd.command, {
+            shell: true,
+            stdio: 'inherit'
+          });
+
+          child.on('error', (error) => {
+            console.log(chalk.default.red(`❌ Erro ao executar comando: ${error.message}`));
+          });
+
+          child.on('close', (code) => {
+            if (code === 0) {
+              console.log(chalk.default.green('✨ Done.'));
+            } else {
+              console.log(chalk.default.red(`❌ Comando finalizado com código: ${code}`));
+            }
+          });
+        });
+    }
+  });
+}
+
+// Registrar atalhos antes de fazer parse
+registerShortcuts();
 
 program.parse();

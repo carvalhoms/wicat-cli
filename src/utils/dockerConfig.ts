@@ -8,6 +8,7 @@ export interface DockerCommand {
   name: string;
   type: DockerCommandType;
   command: string;
+  shortcut?: string;
 }
 
 const configDir = path.join(os.homedir(), '.wicat-cli');
