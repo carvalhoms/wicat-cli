@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import { generateUuids } from './commands/uuids.js';
 import { executeGo, addGoStack, listGoStacks, editGoStack } from './commands/go.js';
+import { executeDockerInteractive, addDockerCommand, listDockerCommands, editDockerCommand, removeDockerCommand } from './commands/docker.js';
 
 const program = new Command();
 
@@ -59,6 +60,45 @@ goCommand
       return;
     }
     await executeGo(stack, options.exec, options.getPath, options.getExec);
+  });
+
+// Comando docker com subcomandos
+const dockerCommand = program
+  .command('docker')
+  .description('Seletor interativo de comandos Docker agrupados por tipo');
+
+dockerCommand
+  .command('add')
+  .description('Adicionar novo comando Docker')
+  .action(async () => {
+    await addDockerCommand();
+  });
+
+dockerCommand
+  .command('list')
+  .description('Listar todos os comandos Docker')
+  .action(async () => {
+    await listDockerCommands();
+  });
+
+dockerCommand
+  .command('edit <command>')
+  .description('Editar um comando Docker existente')
+  .action(async (command) => {
+    await editDockerCommand(command);
+  });
+
+dockerCommand
+  .command('remove <command>')
+  .description('Remover um comando Docker existente')
+  .action(async (command) => {
+    await removeDockerCommand(command);
+  });
+
+// Comando docker principal (seletor interativo)
+dockerCommand
+  .action(async () => {
+    await executeDockerInteractive();
   });
 
 program.parse();
