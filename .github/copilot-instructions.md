@@ -2,7 +2,7 @@
 - [x] Verify that the copilot-instructions.md file in the .github directory is created.
 
 - [x] Clarify Project Requirements
-	TypeScript CLI project using Commander.js called wicat-cli with global installation support for Mac/Windows/Linux
+	TypeScript CLI project using Commander.js called wecat-cli with global installation support for Mac/Windows/Linux
 
 - [x] Scaffold the Project
 	Create project structure with TypeScript, Commander.js, and proper configuration for global CLI installation

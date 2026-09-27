@@ -65,7 +65,7 @@ export async function generateUuids(options: UuidOptions): Promise<void> {
     // Validações
     if (isNaN(quantity) || quantity <= 0) {
       console.log(chalk.red('❌ Erro: Por favor, forneça um número válido.'));
-      console.log(chalk.gray('📝 Exemplo: wicat uuids -c 10'));
+      console.log(chalk.gray('📝 Exemplo: wecat uuids -c 10'));
       return;
     }
 

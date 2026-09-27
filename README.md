@@ -1,6 +1,6 @@
-# Wicat CLI
+# Wecat CLI
 
-CLI tools for Wicat development.
+CLI tools for Wecat development.
 
 ## Installation
 
@@ -27,13 +27,13 @@ yarn link
 
 ```bash
 # Exibir ajuda
-wicat --help
+wecat --help
 
 # Gerar UUIDs (modo interativo)
-wicat uuids
+wecat uuids
 
 # Gerar UUIDs (quantidade específica)
-wicat uuids -c 10
+wecat uuids -c 10
 ```
 
 ## Development
@@ -65,5 +65,5 @@ wicat-cli/
 ### Aliases Disponíveis
 
 ```bash
-wicat u         # Alias para wicat uuids
+wecat u         # Alias para wecat uuids
 ```

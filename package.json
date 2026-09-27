@@ -1,21 +1,22 @@
 {
-  "name": "wicat-cli",
+  "name": "wecat-cli",
   "version": "1.0.0",
-  "description": "CLI tools for Wicat development",
+  "description": "CLI tools for Wecat development",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "wicat": "./dist/index.js"
+    "wecat": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
+    "install:bin": "tsc --noEmit && bun build src/index.ts --compile --outfile \"$HOME/.local/bin/wecat\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "cli",
-    "wicat",
+    "wecat",
     "tools"
   ],
   "author": "",

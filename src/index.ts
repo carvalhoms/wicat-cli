@@ -6,8 +6,8 @@ import { generateUuids } from './commands/uuids.js';
 const program = new Command();
 
 program
-  .name('wicat')
-  .description('Wicat CLI - Ferramentas para desenvolvimento')
+  .name('wecat')
+  .description('Wecat CLI - Ferramentas para desenvolvimento')
   .version('1.0.0');
 
 program
