@@ -26,11 +26,17 @@
     "clipboardy": "^4.0.0",
     "commander": "^14.0.0",
     "enquirer": "^2.4.1",
+    "ink": "7.1.1",
+    "ink-select-input": "6.2.0",
+    "ink-text-input": "6.0.0",
+    "react": "19.3.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
+    "@types/react": "19.3.0",
     "@types/uuid": "^10.0.0",
+    "react-devtools-core": "8.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }

@@ -2,6 +2,7 @@
 
 import { Command } from 'commander';
 import { generateUuids } from './commands/uuids.js';
+import { startUi } from './ui/app.js';
 
 const program = new Command();
 
@@ -20,4 +21,9 @@ program
     await generateUuids(options);
   });
 
-program.parse();
+// Sem argumentos abre a interface; com argumentos segue como comando direto
+if (process.argv.length <= 2) {
+  await startUi();
+} else {
+  program.parse();
+}
