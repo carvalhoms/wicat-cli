@@ -37,7 +37,7 @@ function App(): React.JSX.Element {
   return (
     <Box flexDirection="column" paddingX={1}>
       <Box flexDirection="column" marginBottom={1}>
-        <Text color="cyan">{logo}</Text>
+        <Text color="blue">{logo}</Text>
         <Text color="gray"> ferramentas para desenvolvimento</Text>
       </Box>
 
