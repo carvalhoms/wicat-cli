@@ -11,7 +11,7 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "install:bin": "tsc --noEmit && bun build src/index.ts --compile --outfile \"$HOME/.local/bin/wecat\"",
+    "install:bin": "tsc --noEmit && mkdir -p .temp && (cd .temp && bun build ../src/index.ts --compile --outfile \"$HOME/.local/bin/wecat\"); status=$?; rm -rf .temp; exit $status",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
